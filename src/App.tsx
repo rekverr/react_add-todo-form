@@ -3,7 +3,6 @@ import { TodoList } from './components/TodoList';
 import './App.scss';
 import usersFromServer from './api/users';
 import todosFromServer from './api/todos';
-import { UserInfo } from './components/UserInfo';
 
 export const App = () => {
   const [title, setTitle] = useState('');
@@ -98,7 +97,9 @@ export const App = () => {
             </option>
 
             {usersFromServer.map(user => (
-              <UserInfo key={user.id} user={user} />
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
             ))}
           </select>
 

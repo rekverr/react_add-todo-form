@@ -2,24 +2,44 @@ import { Todos } from '../../types/Todos';
 import { Users } from '../../types/Users';
 import { TodoInfo } from '../TodoInfo';
 
-export const TodoList = ({
-  todos,
-  users,
-}: {
-  todos: Todos[];
-  users: Users[];
-}) => {
+type TodoWithUser = Todos & {
+  user: Users;
+};
+
+type TodoListProps = {
+  todos: TodoWithUser[] | Todos[];
+  users?: Users[];
+};
+
+export const TodoList = ({ todos, users }: TodoListProps) => {
+  const normalizedTodos = todos.map(todo => {
+    if ('user' in todo && todo.user) {
+      return todo as TodoWithUser;
+    }
+
+    const user = (users || []).find(item => item.id === (todo as Todos).userId);
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      ...(todo as Todos),
+      user,
+    } as TodoWithUser;
+  });
+
+  const renderTodoInfo = (todo: TodoWithUser | null) => {
+    if (!todo) {
+      return null;
+    }
+
+    return <TodoInfo key={todo.id} todo={todo} />;
+  };
+
   return (
     <section className="TodoList">
-      {todos.map(todo => {
-        const user = users.find(item => item.id === todo.userId);
-
-        if (!user) {
-          return null;
-        }
-
-        return <TodoInfo key={todo.id} todo={{ ...todo, user }} />;
-      })}
+      {normalizedTodos.map(renderTodoInfo)}
     </section>
   );
 };
