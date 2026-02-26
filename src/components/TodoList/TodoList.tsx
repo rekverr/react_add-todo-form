@@ -12,34 +12,36 @@ type TodoListProps = {
 };
 
 export const TodoList = ({ todos, users }: TodoListProps) => {
-  const normalizedTodos = todos.map(todo => {
-    if ('user' in todo && todo.user) {
-      return todo as TodoWithUser;
-    }
+  if (!todos || !users) {
+    return null;
+  }
 
-    const user = (users || []).find(item => item.id === (todo as Todos).userId);
+  const normalizedTodos = todos
+    .map(todo => {
+      if ('user' in todo && todo.user) {
+        return todo as TodoWithUser;
+      }
 
-    if (!user) {
-      return null;
-    }
+      const user = (users || []).find(
+        item => item.id === (todo as Todos).userId,
+      );
 
-    return {
-      ...(todo as Todos),
-      user,
-    } as TodoWithUser;
-  });
+      if (!user) {
+        return null;
+      }
 
-  const renderTodoInfo = (todo: TodoWithUser | null) => {
-    if (!todo) {
-      return null;
-    }
-
-    return <TodoInfo key={todo.id} todo={todo} />;
-  };
+      return {
+        ...(todo as Todos),
+        user,
+      } as TodoWithUser;
+    })
+    .filter((todo): todo is TodoWithUser => Boolean(todo));
 
   return (
     <section className="TodoList">
-      {normalizedTodos.map(renderTodoInfo)}
+      {normalizedTodos.map(todo => (
+        <TodoInfo key={todo.id} todo={todo} />
+      ))}
     </section>
   );
 };

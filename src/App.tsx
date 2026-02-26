@@ -9,40 +9,27 @@ export const App = () => {
   const [userId, setUserId] = useState(0);
   const [hasErrorInput, setHasErrorInput] = useState(false);
   const [hasErrorSelect, setHasErrorSelect] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [todos, setTodos] = useState(todosFromServer);
-
-  const validateInput = (value: string) => {
-    if (value.length > 0) {
-      setHasErrorInput(false);
-    } else {
-      setHasErrorInput(true);
-    }
-  };
-
-  const validateSelect = (value: number) => {
-    if (value !== 0) {
-      setHasErrorSelect(false);
-    } else {
-      setHasErrorSelect(true);
-    }
-  };
 
   const handleUserChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = Number(event.target.value);
 
     setUserId(value);
-    validateSelect(value);
+    setHasErrorSelect(false);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
 
     setTitle(value);
-    validateInput(value);
+    setHasErrorInput(false);
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    setIsSubmitted(true);
 
     const isTitleEmpty = !title;
     const isUserNotSelected = userId === 0;
@@ -51,6 +38,12 @@ export const App = () => {
     setHasErrorSelect(isUserNotSelected);
 
     if (!isTitleEmpty && !isUserNotSelected) {
+      const selectedUser = usersFromServer.find(user => user.id === userId);
+
+      if (!selectedUser) {
+        return;
+      }
+
       setTodos(prevTodos => [
         ...prevTodos,
         {
@@ -58,6 +51,7 @@ export const App = () => {
           title,
           userId,
           completed: false,
+          user: selectedUser,
         },
       ]);
       setTitle('');
@@ -81,7 +75,9 @@ export const App = () => {
             placeholder="Enter a title"
           />
 
-          {hasErrorInput && <span className="error">Please enter a title</span>}
+          {isSubmitted && hasErrorInput && (
+            <span className="error">Please enter a title</span>
+          )}
         </div>
 
         <div className="field">
@@ -103,7 +99,7 @@ export const App = () => {
             ))}
           </select>
 
-          {hasErrorSelect && (
+          {isSubmitted && hasErrorSelect && (
             <span className="error">Please choose a user</span>
           )}
         </div>
