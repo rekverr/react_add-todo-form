@@ -3,6 +3,12 @@ import { TodoList } from './components/TodoList';
 import './App.scss';
 import usersFromServer from './api/users';
 import todosFromServer from './api/todos';
+import { Todos } from './types/Todos';
+import { Users } from './types/Users';
+
+type TodoWithUser = Todos & {
+  user: Users;
+};
 
 export const App = () => {
   const [title, setTitle] = useState('');
@@ -59,6 +65,27 @@ export const App = () => {
     }
   };
 
+  const normalizedTodos = todos
+    .map(todo => {
+      if ('user' in todo && todo.user) {
+        return todo as TodoWithUser;
+      }
+
+      const user = usersFromServer.find(
+        item => item.id === (todo as Todos).userId,
+      );
+
+      if (!user) {
+        return null;
+      }
+
+      return {
+        ...(todo as Todos),
+        user,
+      } as TodoWithUser;
+    })
+    .filter((todo): todo is TodoWithUser => Boolean(todo));
+
   return (
     <div className="App">
       <h1>Add todo form</h1>
@@ -109,7 +136,7 @@ export const App = () => {
         </button>
       </form>
 
-      <TodoList todos={todos} users={usersFromServer} />
+      <TodoList todos={normalizedTodos} users={usersFromServer} />
     </div>
   );
 };

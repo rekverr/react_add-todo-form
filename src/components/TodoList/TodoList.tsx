@@ -7,7 +7,7 @@ type TodoWithUser = Todos & {
 };
 
 type TodoListProps = {
-  todos: TodoWithUser[] | Todos[];
+  todos: TodoWithUser[];
   users?: Users[];
 };
 
@@ -16,30 +16,9 @@ export const TodoList = ({ todos, users }: TodoListProps) => {
     return null;
   }
 
-  const normalizedTodos = todos
-    .map(todo => {
-      if ('user' in todo && todo.user) {
-        return todo as TodoWithUser;
-      }
-
-      const user = (users || []).find(
-        item => item.id === (todo as Todos).userId,
-      );
-
-      if (!user) {
-        return null;
-      }
-
-      return {
-        ...(todo as Todos),
-        user,
-      } as TodoWithUser;
-    })
-    .filter((todo): todo is TodoWithUser => Boolean(todo));
-
   return (
     <section className="TodoList">
-      {normalizedTodos.map(todo => (
+      {todos.map(todo => (
         <TodoInfo key={todo.id} todo={todo} />
       ))}
     </section>
